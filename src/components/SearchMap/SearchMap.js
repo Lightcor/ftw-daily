@@ -145,11 +145,9 @@ export class SearchMapComponent extends Component {
     // When changing from default map provider to Google Maps, you should use the following
     // component instead of SearchMapWithMapbox:
     //
-    // <SearchMapWithGoogleMap
-    //   containerElement={
-    //     <div id="search-map-container" className={classes} onClick={this.onMapClicked} />
-    //   }
-    //   mapElement={<div className={mapRootClassName || css.mapRoot} />}
+    // <SearchMapWithGoogleMaps
+    //   id="searchMap"
+    //   className={classes}
     //   bounds={bounds}
     //   center={center}
     //   location={location}
@@ -158,10 +156,12 @@ export class SearchMapComponent extends Component {
     //   activeListingId={activeListingId}
     //   mapComponentRefreshToken={this.state.mapReattachmentCount}
     //   createURLToListing={this.createURLToListing}
+    //   onClick={this.onMapClicked}
     //   onListingClicked={this.onListingClicked}
     //   onListingInfoCardClicked={this.onListingInfoCardClicked}
     //   onMapLoad={this.onMapLoadHandler}
     //   onMapMoveEnd={onMapMoveEnd}
+    //   reusableMapHiddenHandle={REUSABLE_MAP_HIDDEN_HANDLE}
     //   zoom={zoom}
     // />
 
@@ -173,6 +173,7 @@ export class SearchMapComponent extends Component {
         messages={messages}
       >
         <SearchMapWithMapbox
+          id="searchMap"
           className={classes}
           bounds={bounds}
           center={center}
@@ -182,13 +183,13 @@ export class SearchMapComponent extends Component {
           activeListingId={activeListingId}
           mapComponentRefreshToken={this.state.mapReattachmentCount}
           createURLToListing={this.createURLToListing}
+          onClick={this.onMapClicked}
           onListingClicked={this.onListingClicked}
           onListingInfoCardClicked={this.onListingInfoCardClicked}
           onMapLoad={this.onMapLoadHandler}
-          onClick={this.onMapClicked}
           onMapMoveEnd={onMapMoveEnd}
-          zoom={zoom}
           reusableMapHiddenHandle={REUSABLE_MAP_HIDDEN_HANDLE}
+          zoom={zoom}
         />
       </ReusableMapContainer>
     ) : (
