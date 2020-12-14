@@ -79,11 +79,28 @@ exports.openIdConfiguration = (req, res) => {
   });
 };
 
-// Serves the RSA public key as JWK
+/**
+ * @param {String} signingAlg signing algorithm, currently only RS256 is supported
+ * @param {Array} list containing keys to be served in json endpoint
+ *
+ * // Serves the RSA public key as JWK
 // this document is expected to be found from
 // api/.well-known/jwks.json endpoint as stated in discovery document
-exports.jwksUri = (rsaPublicKey, keyId) => (req, res) => {
-  fromKeyLike(crypto.createPublicKey(rsaPublicKey)).then(jwkPublicKey => {
-    res.json({ keys: [{ alg: 'RS256', kid: keyId, use: 'sig', ...jwkPublicKey }] });
+ */
+exports.jwksUri = (signingAlg, keys) => (req, res) => {
+  if (signingAlg !== 'RS256') {
+    console.error(`${signingAlg} is not currently supported!`);
+    return;
+  }
+  const jwkKeys = keys.map(key => {
+    return fromKeyLike(crypto.createPublicKey(key.rsaPublicKey));
+  });
+
+  Promise.all(jwkKeys).then(resolvedJwkKeys => {
+    const jwkKeys = resolvedJwkKeys.map((resolvedKey, i) => {
+      const originalKey = keys[i];
+      return { alg: signingAlg, kid: originalKey.keyId, use: 'sig', ...resolvedKey };
+    });
+    res.json({ keys: jwkKeys });
   });
 };

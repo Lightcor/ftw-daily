@@ -92,7 +92,7 @@ const keyId = process.env.KEY_ID;
 
 if (rsaPublicKey && rsaSecretKey) {
   router.get('/.well-known/openid-configuration', openIdConfiguration);
-  router.get('/.well-known/jwks.json', jwksUri(rsaPublicKey, keyId));
+  router.get('/.well-known/jwks.json', jwksUri('RS256', [{ rsaPublicKey, keyId }]));
 }
 
 module.exports = router;
