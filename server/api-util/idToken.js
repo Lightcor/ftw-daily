@@ -12,14 +12,13 @@ const issuerUrl = useDevApiServer ? `http://localhost:${PORT}/api` : `${rootUrl}
 /**
  * Gets user information and creates the signed jwt for id token.
  *
- * @param {string} idpClientId
- * @param {string} rsaPrivateKey
- * @param {string} keyId
- * @param {Object} user
+ * @param {string} idpClientId the client id of the idp provider in Console
+ * @param {Object} options signing options containing signingAlg and required key information
+ * @param {Object} user user information containing at least firstName, lastName, email and emailVerified
  *
  * @return {Promise} idToken
  */
-exports.createIdToken = (idpClientId, rsaPrivateKey, keyId, user) => {
+exports.createIdToken = (idpClientId, options, user) => {
   if (!idpClientId) {
     console.error('Missing idp client id!');
     return;
@@ -28,6 +27,16 @@ exports.createIdToken = (idpClientId, rsaPrivateKey, keyId, user) => {
     console.error('Missing user information!');
     return;
   }
+
+  const signingAlg = options.signingAlg;
+
+  // Currently Flex supports only RS256 signing algorithm.
+  if (signingAlg !== 'RS256') {
+    console.error(`${signingAlg} is not currently supported!`);
+    return;
+  }
+
+  const { rsaPrivateKey, keyId } = options;
 
   if (!rsaPrivateKey) {
     console.error('Missing RSA private key!');
@@ -39,15 +48,15 @@ exports.createIdToken = (idpClientId, rsaPrivateKey, keyId, user) => {
   // https://github.com/panva/jose/blob/master/docs/types/_types_d_.keylike.md
   const privateKey = crypto.createPrivateKey(rsaPrivateKey);
 
-  const { userId, profile } = user;
+  const { userId, firstName, lastName, email, emailVerified } = user;
 
   const jwt = new SignJWT({
-    given_name: profile.firstName,
-    family_name: profile.lastName,
-    email: profile.email,
-    email_verified: profile.emailVerified,
+    given_name: firstName,
+    family_name: lastName,
+    email: email,
+    email_verified: emailVerified,
   })
-    .setProtectedHeader({ alg: 'RS256', kid: keyId })
+    .setProtectedHeader({ alg: signingAlg, kid: keyId })
     .setIssuedAt()
     .setIssuer(issuerUrl)
     .setSubject(userId)
